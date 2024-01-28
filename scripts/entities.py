@@ -92,12 +92,13 @@ class PhysicsEntity:
         self.animation.update() # update animation
 
 
-    def render(self, surf, offset={0,0}):
+    def render(self, surf, images, rotation, offset={0,0}):
         '''
-        renders entitiy asset
+        partly overriding rendering for dashing
         '''
-        surf.blit(pygame.transform.flip(self.animation.img(), self.flip, False), (self.pos[0] - offset[0] + self.anim_offset[0], self.pos[1] - offset[1] + self.anim_offset[1])) # fliping agasint horizontal axis
-
+        for i, img in enumerate(images):
+            rotated_img = pygame.transform.rotate(img, rotation)
+            surf.blit(rotated_img, (self.pos[0] - rotated_img.get_width() // 2, self.pos[1] - rotated_img.get_height() // 2))
 
 
 class Player(PhysicsEntity):
@@ -160,16 +161,7 @@ class Player(PhysicsEntity):
             self.velocity[0] = 0
         if abs(self.velocity[1]) < 0.1:
             self.velocity[1] = 0
-
-
-    def render(self, surf, offset={0,0}):
-        '''
-        partly overriding rendering for dashing
-        '''
-        if abs(self.dashing) <= 50: # not in first 10 frames of dash
-            super().render(surf, offset=offset) # show player
-
-    
+ 
     def dash(self, direction):
         '''
         makes the player dash
@@ -205,25 +197,6 @@ class Enemies(PhysicsEntity):
                 angle = math.atan2(dis.y, dis.x)
                 movement = (math.cos(angle) * self.speed, math.sin(angle) * self.speed)
                 self.walking = True
-            elif (abs(self.game.player.pos[1] - self.pos[1]) != 0):
-                angle = math.atan2(dis.y, dis.x)
-                movement = (0, math.sin(angle) * self.speed * 1.5)
-                self.walking = True
-                # get angle 
-                angle = math.atan2(dis.y, dis.x)
-                if not self.timer: # if self.timer = 0
-                    if (self.flip and dis[0] < 0): # player is left of enemy, and enemy is looking left
-                        self.timer = 60 # Set a cooldown timer for shooting (300 frames = 5 seconds)
-                        self.game.sfx['shoot'].play()
-                        self.game.projectiles.append([[self.rect().centerx - 7, self.rect().centery], -2.5, 0])
-                        for i in range(4):
-                            self.game.sparks.append(Spark(self.game.projectiles[-1][0], random.random() - 0.5 + math.pi, 2 + random.random())) # getting pos from projectiles in it's list, facing left
-                    if (not self.flip and dis[0] > 0):
-                        self.game.projectiles.append([[self.rect().centerx + 7, self.rect().centery], 2.5, 0])
-                        self.timer = 60  # Set a cooldown timer for shooting (300 frames = 5 seconds)
-                        self.game.sfx['shoot'].play()
-                        for i in range(4):
-                            self.game.sparks.append(Spark(self.game.projectiles[-1][0], random.random() - 0.5, 2 + random.random())) # facing right
         elif random.random() < 0.01: # 1 in every 6.1 seconds
             self.walking = random.randint(30, 120)
         
@@ -233,35 +206,18 @@ class Enemies(PhysicsEntity):
        
         super().update(tilemap, movement=movement)
 
-        if movement[0] != 0 or movement[1] != 0:
-            self.set_action('run')
-        else:
-            self.set_action('idle')
+        if self.rect().colliderect(self.game.player.rect()): # if enemy hitbox collides with player
+            self.game.screenshake = max(16, self.game.screenshake)  # apply screenshake
+            self.game.sfx['hit'].play()
+            for i in range(30): # enemy death effect
+                # on death sparks
+                angle = random.random() * math.pi * 2 # random angle in a circle
+                speed = random.random() * 5
+                self.game.sparks.append(Spark(self.rect().center, angle, 2 + random.random())) 
+                # on death particles
+                self.game.particles.append(Particle(self.game, 'particle', self.rect().center, velocity=[math.cos(angle + math.pi) * speed * 0.5, math.sin(angle * math.pi) * speed * 0.5], frame=random.randint(0, 7)))
+            self.game.sparks.append(Spark(self.rect().center, 0, 5 + random.random())) # left
+            self.game.sparks.append(Spark(self.rect().center, math.pi, 5 + random.random())) # right
+            return True # [**]
+            
 
-        if abs(self.game.player.dashing) >= 50:
-            if self.rect().colliderect(self.game.player.rect()): # if enemy hitbox collides with player
-                self.game.screenshake = max(16, self.game.screenshake)  # apply screenshake
-                self.game.sfx['hit'].play()
-                for i in range(30): # enemy death effect
-                    # on death sparks
-                    angle = random.random() * math.pi * 2 # random angle in a circle
-                    speed = random.random() * 5
-                    self.game.sparks.append(Spark(self.rect().center, angle, 2 + random.random())) 
-                    # on death particles
-                    self.game.particles.append(Particle(self.game, 'particle', self.rect().center, velocity=[math.cos(angle + math.pi) * speed * 0.5, math.sin(angle * math.pi) * speed * 0.5], frame=random.randint(0, 7)))
-                self.game.sparks.append(Spark(self.rect().center, 0, 5 + random.random())) # left
-                self.game.sparks.append(Spark(self.rect().center, math.pi, 5 + random.random())) # right
-                return True # [**]
-                
-
-    def render(self, surf, offset=(0, 0)):
-        super().render(surf, offset=offset)
-
-        if self.flip:
-            surf.blit(pygame.transform.flip(self.game.assets['bow'], True, False), (self.rect().centerx + 1 - self.game.assets['bow'].get_width() + 2 - offset[0], self.rect().centery - 8 - offset[1])) # renders the bow 
-        else:
-            surf.blit(self.game.assets['bow'], (self.rect().centerx - 1 - offset[0], self.rect().centery - 8 - offset[1]))
-
-    
-
-        

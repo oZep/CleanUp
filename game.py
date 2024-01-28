@@ -22,10 +22,6 @@ class Game:
         pygame.display.set_caption("10 Levels of Hell")
         # create window
         self.screen = pygame.display.set_mode((640, 480)) # (640, 480), (960, 720), (768, 576)
-
-        self.display_red= pygame.Surface((320, 240), pygame.SRCALPHA) # render on smaller resolution then scale it up to bigger screen
-
-        self.display_white = pygame.Surface((320, 240), pygame.SRCALPHA) # render on smaller resolution then scale it up to bigger screen
         self.display_black = pygame.Surface((320, 240), pygame.SRCALPHA) # render on smaller resolution then scale it up to bigger screen
         self.display_none = pygame.Surface((320, 240), pygame.SRCALPHA) # render on smaller resolution then scale it up to bigger screen
 
@@ -40,9 +36,6 @@ class Game:
             'player': load_image('entities/player/player.png'),
             'background': load_image('background.png'),
             'heart': load_image('UI/health.png'),
-
-            'player/idle': Animation(load_images('entities/player/idle'), img_dur=1),
-            'player/shoot': Animation(load_images('entities/player/run'), img_dur=4),
             'particle/particle': Animation(load_images('particles/particle'), img_dur=6, loop=False),
         }
 
@@ -54,6 +47,9 @@ class Game:
             'shoot': pygame.mixer.Sound('data/sfx/shoot.wav'),
             'ambience': pygame.mixer.Sound('data/sfx/ambience.wav'),
         }
+
+        self.playerImg = load_images('entities/player/idle')
+        self.enemyImg = load_images('entities/enemy/idle') # just make shooting particle effects
         
         self.sfx['ambience'].set_volume(0.2)
         self.sfx['shoot'].set_volume(0.4)
@@ -63,7 +59,7 @@ class Game:
         #self.clouds = Clouds(self.assets['clouds'], count=16)
 
         # initalizing player
-        self.player = Player(self, (self.display_red.get_width()/2, self.display_red.get_height()/2), (15, 15))
+        self.player = Player(self, (self.display_none.get_width()/2, self.display_none.get_height()/2), (15, 15))
 
         # initalizing tilemap
         self.tilemap = Tilemap(self, tile_size=16)
@@ -80,6 +76,7 @@ class Game:
         self.cooldown = 0
         self.angle_count = 0
         self.horizontal_count = 0
+        self.rotations = 0 # rotations based on camera movement
 
 
     def load_level(self, map_id):
@@ -103,8 +100,8 @@ class Game:
             if spawner['variant'] == 0: 
                 self.player.pos = spawner['pos']
             else:
-                self.enemies.append(enemies(self, spawner['pos'], (21, 31)))
-                # spawn the ememies
+                self.enemies.append(Enemies(self, spawner['pos'], (21, 31)))
+                # spawn the ememies, make random
 
     def run(self):
         '''
@@ -118,8 +115,6 @@ class Game:
 
         # creating an infinite game loop
         while True:
-            self.display_red.fill((0, 0, 0, 0))    # red outlines
-            self.display_white.fill((0, 0, 0, 0))    # white outlines
             self.display_black.fill((0, 0, 0, 0))    # black outlines
             self.display_none.fill((0,0,0,0))
             # clear the screen for new image generation in loop
@@ -137,18 +132,18 @@ class Game:
             
 
             # scroll = current scroll + (where we want the camera to be - what we have/can see currently) 
-            self.scroll[0] = self.display_red.get_width()/2 / 30 + 3 # x axis
-            self.scroll[1] = self.display_red.get_height()/2/ 30 + 3
+            self.scroll[0] = self.display_none.get_width()/2 / 30 + 3 # x axis
+            self.scroll[1] = self.display_none.get_height()/2/ 30 + 3
 
             # fix the jitter
             render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
 
-            self.tilemap.render(self.display_white, offset=render_scroll)
+            self.tilemap.render(self.display_none, self.enemyImg, self.rotations, offset=render_scroll)
 
             # render the enemies
             for enemy in self.enemies.copy():
                 kill =  enemy.update(self.tilemap, (0,0))
-                enemy.render(self.display_black, offset=render_scroll) # change outline here
+                enemy.render(self.display_none, self.enemyImg, self.rotations, offset=render_scroll)
                 if kill: # if enemies update fn returns true [**]
                     self.enemies.remove(enemy) 
                 if self.player.rect().colliderect(enemy): # player collides with enemy
@@ -172,7 +167,7 @@ class Game:
             if self.dead != 1:
                 # update player movement
                 self.player.update(self.tilemap, (self.movement[1] - self.movement[0], self.movement[3] - self.movement[2]))
-                self.player.render(self.display_white, offset=render_scroll)
+                self.player.render(self.display_black,  self.playerImg, self.rotations, offset=render_scroll)
 
             # render/spawn bullet projectiles
             # [[x, y], direction, timer]
@@ -183,27 +178,8 @@ class Game:
                 img = self.assets['projectile']
                 self.display_black.blit(img if projectile[1] > 0 else pygame.transform.flip(img, True, False), (projectile[0][0] - img.get_width() / 2 - render_scroll[0], projectile[0][1] - img.get_height() / 2 - render_scroll[1])) # spawns it the center of the projectile
                 
-                # keep this but change it to the borders of the map, also might want some obsticles later
-                if self.tilemap.solid_check(projectile[0]): # if location is a solid tile
+                if projectile[2] > 360: #if timer > 6 seconds
                     self.projectiles.remove(projectile)
-                    for i in range(4):
-                        self.sparks.append(Spark(projectile[0], random.random() - 0.5 + (math.pi if projectile[1] > 0 else 0), 2 + random.random())) # (math.pi if projectile[1] > 0 else 0), sparks bounce in oppositie direction if hit wall which depends on projectile direction
-                elif projectile[2] > 360: #if timer > 6 seconds
-                    self.projectiles.remove(projectile)
-                elif abs(self.player.dashing) < 50: # if not in dash
-                    if self.player.rect().collidepoint(projectile[0]):
-                        self.projectiles.remove(projectile)
-                        self.dead += 1
-                        self.sfx['hit'].play()
-                        self.screenshake = max(16, self.screenshake)  # apply screenshake, larger wont be overrided by a smaller screenshake
-                        for i in range(30): # when projectile hits player
-                            # on death sparks
-                            angle = random.random() * math.pi * 2 # random angle in a circle
-                            speed = random.random() * 5
-                            self.sparks.append(Spark(self.player.rect().center, angle, 2 + random.random())) 
-                            # on death particles
-                            self.particles.append(Particle(self, 'particle', self.player.rect().center, velocity=[math.cos(angle + math.pi) * speed * 0.5, math.sin(angle * math.pi) * speed * 0.5], frame=random.randint(0, 7)))
-           
                                     
             hp_1 = Heart(self.assets['heart'].copy(), [13, 19], 15)
             hp_2 = Heart(self.assets['heart'].copy(), [30, 19], 15)
@@ -218,7 +194,7 @@ class Game:
                 hp_3.update()
                 hp_3.render(self.display_black)
 
-            level_bar = Levelbar(self.level, pos=(self.display_red.get_width() // 2 - 25, 13))
+            level_bar = Levelbar(self.level, pos=(self.display_none.get_width() // 2 - 25, 13))
             level_bar.render(self.display_black, 22)
             
 
@@ -229,25 +205,10 @@ class Game:
             for offset in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                 self.display_2.blit(display_sillhouette, offset) # putting what we drew onframe back into display
 
-            # red ouline based on display
-            display_mask = pygame.mask.from_surface(self.display_red)
-            display_sillhouette = display_mask.to_surface(setcolor=(225, 0, 0, 180), unsetcolor=(0, 0, 0, 0)) # 180 opaque, 0 transparent
-            self.display_2.blit(display_sillhouette, (0, 0))
-            for offset in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                self.display_2.blit(display_sillhouette, offset) # putting what we drew onframe back into display
-            
-
-            # white ouline based on display_white
-            display_mask = pygame.mask.from_surface(self.display_white)
-            display_sillhouette = display_mask.to_surface(setcolor=(225, 225, 225, 180), unsetcolor=(0, 0, 0, 0)) # 180 opaque, 0 transparent
-            self.display_2.blit(display_sillhouette, (0, 0))
-            for offset in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                self.display_2.blit(display_sillhouette, offset) # putting what we drew onframe back into display
-            
 
             for particle in self.particles.copy():
                 kill = particle.update()
-                particle.render(self.display_red, offset=render_scroll)
+                particle.render(self.display_none, offset=render_scroll)
                 if particle.type == 'leaf':
                     particle.pos[0] += math.sin(particle.animation.frame * 0.035) * 0.3 # making the parlitcle move back and forth smooth'y
                 if kill:
@@ -269,15 +230,13 @@ class Game:
                     if event.key == pygame.K_d: 
                         self.movement[1] = False
             
-            self.display_2.blit(self.display_white, (0, 0)) # white
-            self.display_2.blit(self.display_red, (0, 0)) # red 
             self.display_2.blit(self.display_black, (0, 0)) # black 
             self.display_2.blit(self.display_none, (0,0))
             
             # implementing transition
             if self.transition:
-                transition_surf = pygame.Surface(self.display_red.get_size())
-                pygame.draw.circle(transition_surf, (255, 255, 255), (self.display_red.get_width() // 2, self.display_red.get_height() // 2), (30 - abs(self.transition)) * 8) # display center of screen, 30 is the timer we chose, 30 * 8 = 180
+                transition_surf = pygame.Surface(self.display_none.get_size())
+                pygame.draw.circle(transition_surf, (255, 255, 255), (self.display_none.get_width() // 2, self.display_none.get_height() // 2), (30 - abs(self.transition)) * 8) # display center of screen, 30 is the timer we chose, 30 * 8 = 180
                 transition_surf.set_colorkey((255, 255, 255)) # making the circle transparent now
                 self.display_2.blit(transition_surf, (0, 0))
 
