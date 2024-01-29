@@ -76,6 +76,8 @@ class Game:
         self.horizontal_count = 0
         self.rotations = 0 # rotations based on camera movement
         self.score = 0
+        self.left_key_pressed = False
+        self.right_key_pressed = False
 
 
     def load_level(self, map_id):
@@ -106,11 +108,11 @@ class Game:
         '''
         runs the Game
         '''
-        pygame.mixer.music.load('data/music.mp3')
-        pygame.mixer.music.set_volume(0.5)
-        pygame.mixer.music.play(-1)
+        #pygame.mixer.music.load('data/music.mp3')
+        #pygame.mixer.music.set_volume(0.5)
+        #pygame.mixer.music.play(-1)
 
-        self.sfx['ambience'].play(-1)
+        #self.sfx['ambience'].play(-1)
 
         # creating an infinite game loop
         while True:
@@ -221,20 +223,33 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a: # referencing WASD
                         self.movement[0] = True
-                        self.rotations += 0.5
+                        self.rotations += 3
                     if event.key == pygame.K_d:
                         self.movement[1] = True # make going forward alway constant
-                        self.rotations -= 0.5
-                    if self.rotations >= 0:
-                        self.movement[2] = True
-                    else:
-                        self.movement[3] = True
-                if event.type == pygame.KEYUP: # when key is released
-                    if event.key == pygame.K_a: 
-                        self.movement[0] = False
-                    if event.key == pygame.K_d: 
-                        self.movement[1] = False
-            
+                        self.rotations -= 3
+
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_a:
+                        self.left_key_pressed = True
+                    elif event.key == pygame.K_d:
+                        self.right_key_pressed = True
+                elif event.type == pygame.KEYUP:
+                    if event.key == pygame.K_a:
+                        self.left_key_pressed = False
+                    elif event.key == pygame.K_d:
+                        self.right_key_pressed = False
+
+            if self.left_key_pressed:
+                self.rotations += 3
+            if self.right_key_pressed:
+                self.rotations -= 3  
+
+            if self.rotations > 0:
+                self.movement[2] = True
+            else:
+                self.movement[3] = True
+
             self.display2.blit(self.display, (0, 0)) # black 
 
 

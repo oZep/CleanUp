@@ -116,6 +116,7 @@ class Player(PhysicsEntity):
         '''
         super().update(tilemap, movement=movement)
 
+
         self.set_action('idle')
 
         if abs(self.velocity[0]) < 0.1: # stops small sliding across screen after dash
