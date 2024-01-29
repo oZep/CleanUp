@@ -19,7 +19,7 @@ class Game:
         pygame.init()
 
         # change the window caption
-        pygame.display.set_caption("10 Levels of Hell")
+        pygame.display.set_caption("CleanUp!")
         # create window
         self.screen = pygame.display.set_mode((640, 480)) # (640, 480), (960, 720), (768, 576)
         self.display_black = pygame.Surface((320, 240), pygame.SRCALPHA) # render on smaller resolution then scale it up to bigger screen
@@ -33,10 +33,9 @@ class Game:
         self.movement = [False, False, False, False]
 
         self.assets = {
-            'player': load_image('entities/player/player.png'),
-            'background': load_image('background.png'),
-            'heart': load_image('UI/health.png'),
-            'particle/particle': Animation(load_images('particles/particle'), img_dur=6, loop=False),
+            'background': load_image('background.jpeg'),
+            'player/idle': Animation(load_images('entities/player/idle'))
+            #'particle/particle': Animation(load_images('particles/particle'), img_dur=6, loop=False),
         }
 
         # adding sound
@@ -119,7 +118,7 @@ class Game:
             self.display_black.fill((0, 0, 0, 0))    # black outlines
             self.display_none.fill((0,0,0,0))
             # clear the screen for new image generation in loop
-            self.display_2.blit(self.assets['background'], (0,0)) # no outline
+            self.display_black.blit(self.assets['background'], (0,0)) # no outline
 
             self.screenshake = max(0, self.screenshake-1) # resets screenshake value
 
@@ -139,7 +138,7 @@ class Game:
             # fix the jitter
             render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
 
-            self.tilemap.render(self.display_none, self.enemyImg, self.rotations, offset=render_scroll)
+            self.tilemap.render(self.display_none, offset=render_scroll)
 
             # render the enemies
             for enemy in self.enemies.copy():
@@ -168,32 +167,32 @@ class Game:
             if self.dead != 1:
                 # update player movement
                 self.player.update(self.tilemap, (self.movement[1] - self.movement[0], self.movement[3] - self.movement[2]))
-                self.player.render(self.display_black,  self.playerImg, self.rotations, offset=render_scroll)
+                self.player.render(self.display_none,  self.playerImg, self.rotations, offset=render_scroll)
 
             # render/spawn bullet projectiles
             # [[x, y], direction, timer]
             # make direction go based on angle
-            for projectile in self.projectiles.copy():
-                projectile[0][0] += projectile[1] 
-                projectile[2] += 1
-                img = self.assets['projectile']
-                self.display_black.blit(img if projectile[1] > 0 else pygame.transform.flip(img, True, False), (projectile[0][0] - img.get_width() / 2 - render_scroll[0], projectile[0][1] - img.get_height() / 2 - render_scroll[1])) # spawns it the center of the projectile
+            #for projectile in self.projectiles.copy():
+            #    projectile[0][0] += projectile[1] 
+            #    projectile[2] += 1
+            #    img = self.assets['projectile']
+            #    self.display_black.blit(img if projectile[1] > 0 else pygame.transform.flip(img, True, False), (projectile[0][0] - img.get_width() / 2 - render_scroll[0], projectile[0][1] - img.get_height() / 2 - render_scroll[1])) # spawns it the center of the projectile
                 
-                if projectile[2] > 360: #if timer > 6 seconds
-                    self.projectiles.remove(projectile)
+            #    if projectile[2] > 360: #if timer > 6 seconds
+            #        self.projectiles.remove(projectile)
                                     
-            hp_1 = Heart(self.assets['heart'].copy(), [13, 19], 15)
-            hp_2 = Heart(self.assets['heart'].copy(), [30, 19], 15)
-            hp_3 = Heart(self.assets['heart'].copy(), [47, 19], 15)
-            if self.dead <= 0 and self.dead < 1:
-                hp_1.update()
-                hp_1.render(self.display_black)
-            if self.dead <= -1:
-                hp_2.update()
-                hp_2.render(self.display_black)
-            if self.dead <= -2:
-                hp_3.update()
-                hp_3.render(self.display_black)
+            #hp_1 = Heart(self.assets['heart'].copy(), [13, 19], 15)
+            #hp_2 = Heart(self.assets['heart'].copy(), [30, 19], 15)
+            #hp_3 = Heart(self.assets['heart'].copy(), [47, 19], 15)
+            #if self.dead <= 0 and self.dead < 1:
+            #    hp_1.update()
+            #    hp_1.render(self.display_black)
+            #if self.dead <= -1:
+            #    hp_2.update()
+            #    hp_2.render(self.display_black)
+            #if self.dead <= -2:
+            #    hp_3.update()
+            #    hp_3.render(self.display_black)
 
             level_bar = Levelbar(self.level, pos=(self.display_none.get_width() // 2 - 25, 13))
             level_bar.render(self.display_black, 22)
@@ -234,8 +233,8 @@ class Game:
                     if event.key == pygame.K_d: 
                         self.movement[1] = False
             
-            self.display_2.blit(self.display_black, (0, 0)) # black 
-            self.display_2.blit(self.display_none, (0,0))
+            self.display_2.blit(self.display_none, (0, 0)) # black 
+            self.display_2.blit(self.display_black, (0,0))
             
             # implementing transition
             if self.transition:

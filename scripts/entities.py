@@ -147,15 +147,8 @@ class Player(PhysicsEntity):
             # trail of particles in the middle of dash
             pvelocity = [abs(self.dashing)/self.dashing * random.random() * 3, 0] # particles move in the direction of the dash
             self.game.particles.append(Particle(self.game, 'particle', self.rect().center, velocity=pvelocity, frame=random.randint(0, 7)))
-    
-        if movement[0] != 0: # if moving horizontally
-            self.set_action('run')
-        elif movement[1] > 0:
-            self.set_action('runDOWN')
-        elif movement[1] < 0:
-            self.set_action('runUP')
-        else:
-            self.set_action('idle')
+
+        self.set_action('idle')
 
         if abs(self.velocity[0]) < 0.1: # stops small sliding across screen after dash
             self.velocity[0] = 0
