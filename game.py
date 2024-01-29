@@ -22,10 +22,9 @@ class Game:
         pygame.display.set_caption("CleanUp!")
         # create window
         self.screen = pygame.display.set_mode((640, 480)) # (640, 480), (960, 720), (768, 576)
-        self.display_black = pygame.Surface((320, 240), pygame.SRCALPHA) # render on smaller resolution then scale it up to bigger screen
-        self.display_none = pygame.Surface((320, 240), pygame.SRCALPHA) # render on smaller resolution then scale it up to bigger screen
+        self.display = pygame.Surface((320, 240), pygame.SRCALPHA) # render on smaller resolution then scale it up to bigger screen
 
-        self.display_2 = pygame.Surface((320, 240))
+        self.display2 = pygame.Surface((320, 240))
 
 
         self.clock = pygame.time.Clock()
@@ -58,7 +57,7 @@ class Game:
         #self.clouds = Clouds(self.assets['clouds'], count=16)
 
         # initalizing player
-        self.player = Player(self, (self.display_none.get_width()/2, self.display_none.get_height()/2), (15, 15))
+        self.player = Player(self, (self.display2.get_width()/2, self.display2.get_height()/2), (15, 15))
 
         # initalizing tilemap
         self.tilemap = Tilemap(self, tile_size=16)
@@ -115,10 +114,10 @@ class Game:
 
         # creating an infinite game loop
         while True:
-            self.display_black.fill((0, 0, 0, 0))    # black outlines
-            self.display_none.fill((0,0,0,0))
+            self.display.fill((0, 0, 0, 0))    # black outlines
+            self.display.fill((0,0,0,0))
             # clear the screen for new image generation in loop
-            self.display_black.blit(self.assets['background'], (0,0)) # no outline
+            self.display.blit(self.assets['background'], (0,0)) # no outline
 
             self.screenshake = max(0, self.screenshake-1) # resets screenshake value
 
@@ -132,18 +131,18 @@ class Game:
             
 
             # scroll = current scroll + (where we want the camera to be - what we have/can see currently) 
-            self.scroll[0] = self.display_none.get_width()/2 / 30 + 3 # x axis
-            self.scroll[1] = self.display_none.get_height()/2/ 30 + 3
+            self.scroll[0] = self.display.get_width()/2 / 30 + 3 # x axis
+            self.scroll[1] = self.display.get_height()/2/ 30 + 3
 
             # fix the jitter
             render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
 
-            self.tilemap.render(self.display_none, offset=render_scroll)
+            self.tilemap.render(self.display, offset=render_scroll)
 
             # render the enemies
             for enemy in self.enemies.copy():
                 kill =  enemy.update(self.tilemap, (0,0))
-                enemy.render(self.display_none, self.enemyImg, self.rotations, offset=render_scroll)
+                enemy.render(self.display, self.enemyImg, self.rotations, offset=render_scroll)
                 if kill: # if enemies update fn returns true [**]
                     self.enemies.remove(enemy) 
                 if self.player.rect().colliderect(enemy): # player collides with enemy
@@ -167,7 +166,7 @@ class Game:
             if self.dead != 1:
                 # update player movement
                 self.player.update(self.tilemap, (self.movement[1] - self.movement[0], self.movement[3] - self.movement[2]))
-                self.player.render(self.display_none,  self.playerImg, self.rotations, offset=render_scroll)
+                self.player.render(self.display,  self.playerImg, self.rotations, offset=render_scroll)
 
             # render/spawn bullet projectiles
             # [[x, y], direction, timer]
@@ -194,21 +193,21 @@ class Game:
             #    hp_3.update()
             #    hp_3.render(self.display_black)
 
-            level_bar = Levelbar(self.level, pos=(self.display_none.get_width() // 2 - 25, 13))
-            level_bar.render(self.display_black, 22)
+            level_bar = Levelbar(self.level, pos=(self.display.get_width() // 2 - 25, 13))
+            level_bar.render(self.display, 22)
             
 
             # black ouline based on display_black
-            display_mask = pygame.mask.from_surface(self.display_black)
+            display_mask = pygame.mask.from_surface(self.display)
             display_sillhouette = display_mask.to_surface(setcolor=(0, 0, 0, 180), unsetcolor=(0, 0, 0, 0)) # 180 opaque, 0 transparent
-            self.display_2.blit(display_sillhouette, (0, 0))
+            self.display2.blit(display_sillhouette, (0, 0))
             for offset in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                self.display_2.blit(display_sillhouette, offset) # putting what we drew onframe back into display
+                self.display2.blit(display_sillhouette, offset) # putting what we drew onframe back into display
 
 
             for particle in self.particles.copy():
                 kill = particle.update()
-                particle.render(self.display_none, offset=render_scroll)
+                particle.render(self.display, offset=render_scroll)
                 if particle.type == 'leaf':
                     particle.pos[0] += math.sin(particle.animation.frame * 0.035) * 0.3 # making the parlitcle move back and forth smooth'y
                 if kill:
@@ -233,18 +232,12 @@ class Game:
                     if event.key == pygame.K_d: 
                         self.movement[1] = False
             
-            self.display_2.blit(self.display_none, (0, 0)) # black 
-            self.display_2.blit(self.display_black, (0,0))
-            
-            # implementing transition
-            if self.transition:
-                transition_surf = pygame.Surface(self.display_none.get_size())
-                pygame.draw.circle(transition_surf, (255, 255, 255), (self.display_none.get_width() // 2, self.display_none.get_height() // 2), (30 - abs(self.transition)) * 8) # display center of screen, 30 is the timer we chose, 30 * 8 = 180
-                transition_surf.set_colorkey((255, 255, 255)) # making the circle transparent now
-                self.display_2.blit(transition_surf, (0, 0))
+            self.display2.blit(self.display, (0, 0)) # black 
+
+
 
             screenshake_offset = (random.random() * self.screenshake - self.screenshake / 2, random.random() * self.screenshake - self.screenshake / 2)
-            self.screen.blit(pygame.transform.scale(self.display_2, self.screen.get_size()), screenshake_offset) # render (now scaled) display image on big screen
+            self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), screenshake_offset) # render (now scaled) display image on big screen
             pygame.display.update()
             self.clock.tick(60) # run at 60 fps, like a sleep
 
