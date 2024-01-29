@@ -117,7 +117,7 @@ class Game:
             self.display.fill((0, 0, 0, 0))    # black outlines
             self.display.fill((0,0,0,0))
             # clear the screen for new image generation in loop
-            self.display.blit(self.assets['background'], (0,0)) # no outline
+            self.screen.blit(self.assets['background'], (0,0)) # no outline
 
             self.screenshake = max(0, self.screenshake-1) # resets screenshake value
 
