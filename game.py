@@ -85,6 +85,8 @@ class Game:
         self.right_key_pressed = False
         self.gameOver = 0
         self.enemies = [] 
+        self.spawn_timer = 0
+        self.spawn_interval = 40
     
 
     def load_level(self, map_id):
@@ -104,9 +106,12 @@ class Game:
 
         # transition for levels
         self.transition = -30
+
+        self.spawn_timer = 0
+        self.spawn_interval = 40
         
         # spawn the ememies
-        self.enemies = [] # make this random generate and increase spawn # as game time goes on
+        self.enemies = [] # clear enemies
 
         for spawner in self.tilemap.extract([('spawners', 0)]):
             if spawner['variant'] == 0: 
@@ -277,7 +282,6 @@ class Game:
                         if event.key == pygame.K_d:
                             self.movement[1] = True # make going forward alway constant
                             self.rotations -= 3
-                    if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_a:
                             self.left_key_pressed = True
                         elif event.key == pygame.K_d:
