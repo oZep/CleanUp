@@ -225,7 +225,10 @@ class Game:
                     if event.key == pygame.K_d:
                         self.movement[1] = True # make going forward alway constant
                         self.rotations -= 0.5
-                    self.movement[2] = True
+                    if self.rotations >= 0:
+                        self.movement[2] = True
+                    else:
+                        self.movement[3] = True
                 if event.type == pygame.KEYUP: # when key is released
                     if event.key == pygame.K_a: 
                         self.movement[0] = False

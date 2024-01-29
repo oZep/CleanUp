@@ -116,38 +116,6 @@ class Player(PhysicsEntity):
         '''
         super().update(tilemap, movement=movement)
 
-        if abs(self.dashing) in (60, 50): # if at start or end of dash
-            for i in range(20): # do 20 times
-                # for burst of particles
-                angle = random.random() * math.pi * 2
-                speed = random.random() * 0.5 + 0.5 # random from 0.5 to 1
-                pvelocity = [math.cos(angle) * speed, math.sin(angle) * speed]
-                self.game.particles.append(Particle(self.game, 'particle', self.rect().center, velocity=pvelocity, frame=random.randint(0, 7)))
-        # dash cooldown
-        if self.dashing > 0:
-            self.dashing = max(0, self.dashing - 1)
-        if self.dashing < 0:
-            self.dashing = min(0, self.dashing + 1)
-        # dash mechanism (only works in first 10 frames of 'dashing')
-
-        # Will have to change to go in the direction of the mouse
-        if abs(self.dashing) > 50:
-            # need where we want to dash towards
-            if self.direction == 'L': # Left
-                self.velocity[0] = 8 
-            if self.direction == 'J':
-                self.velocity[0] = -8 
-            if self.direction == 'I':
-                 self.velocity[1] = -8 
-            if self.direction == 'K':
-                 self.velocity[1] = 8        
-            if abs(self.dashing) == 51: # slow down dash after 10 frames
-                self.velocity[0] *= 0.01
-                self.velocity[1] *= 0.01  # goes to 0, but never allows player to move downward
-            # trail of particles in the middle of dash
-            pvelocity = [abs(self.dashing)/self.dashing * random.random() * 3, 0] # particles move in the direction of the dash
-            self.game.particles.append(Particle(self.game, 'particle', self.rect().center, velocity=pvelocity, frame=random.randint(0, 7)))
-
         self.set_action('idle')
 
         if abs(self.velocity[0]) < 0.1: # stops small sliding across screen after dash
