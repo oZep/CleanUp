@@ -116,6 +116,19 @@ class Player(PhysicsEntity):
         '''
         super().update(tilemap, movement=movement)
         self.set_action('idle')
+
+        # Player boundary
+        if self.pos[1] >= self.game.screen.get_height():
+            self.pos[1] = self.game.screen.get_height() - 1
+        if self.pos[1] < 0:
+            self.pos[1] = 0
+
+        if self.pos[0] < 0:
+            self.pos[0] = 0
+        if self.pos[0] >= self.game.screen.get_width():
+            self.pos[0] = self.game.screen.get_width() - 1
+
+        print(self.pos)
  
             
 

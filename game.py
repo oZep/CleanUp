@@ -18,7 +18,7 @@ class Game:
         '''
         pygame.init()
 
-        x = (1152, 648)
+        x = (1140, 810)
 
         # change the window caption
         pygame.display.set_caption("CleanUp!")
@@ -59,7 +59,7 @@ class Game:
         #self.clouds = Clouds(self.assets['clouds'], count=16)
 
         # initalizing player
-        self.player = Player(self, (self.display2.get_width()/2, self.display2.get_height()/2), (15, 15))
+        self.player = Player(self, (self.display2.get_width()/2, self.display2.get_height()/2), (32, 32))
 
         # initalizing tilemap
         self.tilemap = Tilemap(self, tile_size=16)
@@ -101,7 +101,7 @@ class Game:
 
         for spawner in self.tilemap.extract([('spawners', 0)]):
             if spawner['variant'] == 0: 
-                self.player.pos = spawner['pos']
+                self.player.pos = [600, 400]
             else:
                 self.enemies.append(Enemies(self, spawner['pos'], (21, 31)))
                 # spawn the ememies, make random
@@ -135,9 +135,8 @@ class Game:
             
 
             # scroll = current scroll + (where we want the camera to be - what we have/can see currently) 
-            self.scroll[0] = self.display.get_width()/2 / 30 + 3 # x axis
-            self.scroll[1] = self.display.get_height()/2/ 30 + 3
-
+            self.scroll[0] = self.display.get_width()/ 2 / 30 
+            self.scroll[1] = self.display.get_height()/ 2
             # fix the jitter
             render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
 
@@ -243,9 +242,9 @@ class Game:
                         self.right_key_pressed = False
 
             if self.left_key_pressed:
-                self.rotations = (self.rotations + 3 ) % 360
+                self.rotations = (self.rotations + 1 ) % 360
             if self.right_key_pressed:
-                self.rotations = (self.rotations - 3 ) % 360
+                self.rotations = (self.rotations - 1 ) % 360
 
             #self.movement[2] = True
             if self.rotations > 90 and self.rotations < 180:

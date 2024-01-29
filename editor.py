@@ -16,9 +16,9 @@ class Editor:
         # change the window caption
         pygame.display.set_caption("editor")
         # create window
-        self.screen = pygame.display.set_mode((640,480))
+        self.screen = pygame.display.set_mode((1152, 648))
 
-        self.display = pygame.Surface((320, 240)) # render on smaller resolution then scale it up to bigger screen
+        self.display = pygame.Surface((1152, 648)) # render on smaller resolution then scale it up to bigger screen
 
         self.clock = pygame.time.Clock()
         
