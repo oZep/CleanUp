@@ -222,7 +222,6 @@ class Game:
                     sys.exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a: # referencing WASD
-                        self.movement[0] = True
                         self.rotations += 3
                     if event.key == pygame.K_d:
                         self.movement[1] = True # make going forward alway constant
@@ -241,16 +240,15 @@ class Game:
                         self.right_key_pressed = False
 
             if self.left_key_pressed:
-                self.rotations += 3
+                self.rotations = (self.rotations + 3 ) % 360
             if self.right_key_pressed:
-                self.rotations -= 3  
+                self.rotations = (self.rotations - 3 ) % 360
 
-            if self.rotations > 0:
-                self.movement[2] = True
-            else:
-                self.movement[3] = True
+            self.movement[2] = True
 
             self.display2.blit(self.display, (0, 0)) # black 
+
+            print(self.rotations)
 
 
 
