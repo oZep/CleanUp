@@ -108,35 +108,15 @@ class Player(PhysicsEntity):
         (game, position, size)
         '''
         super().__init__(game,'player', pos, size)
-        self.dashing = 0
+        self.speed = 3
 
     def update(self, tilemap, movement=(0,0)):
         '''
         updates players animations depending on movement
         '''
         super().update(tilemap, movement=movement)
-
-
         self.set_action('idle')
-
-        if abs(self.velocity[0]) < 0.1: # stops small sliding across screen after dash
-            self.velocity[0] = 0
-        if abs(self.velocity[1]) < 0.1:
-            self.velocity[1] = 0
  
-    def dash(self, direction):
-        '''
-        makes the player dash
-        (direction) 'I' for up, 'J'/'L' for right/left, 'K' for down
-        '''
-        self.direction = direction
-        if not self.dashing:
-            self.game.sfx['dash'].play()
-            if self.flip:
-                self.dashing = -60
-            else:
-                self.dashing = 60 # how long the dash is + it's direction
-                self.set_action('slide')
             
 
 class Enemies(PhysicsEntity):

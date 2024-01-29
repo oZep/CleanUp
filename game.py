@@ -21,10 +21,10 @@ class Game:
         # change the window caption
         pygame.display.set_caption("CleanUp!")
         # create window
-        self.screen = pygame.display.set_mode((640, 480)) # (640, 480), (960, 720), (768, 576)
-        self.display = pygame.Surface((320, 240), pygame.SRCALPHA) # render on smaller resolution then scale it up to bigger screen
+        self.screen = pygame.display.set_mode((1140, 810)) # (640, 480), (960, 720), (768, 576)
+        self.display = pygame.Surface((1152, 648), pygame.SRCALPHA) # render on smaller resolution then scale it up to bigger screen
 
-        self.display2 = pygame.Surface((320, 240))
+        self.display2 = pygame.Surface((1152, 648))
 
 
         self.clock = pygame.time.Clock()
@@ -147,6 +147,7 @@ class Game:
                 enemy.render(self.display, self.enemyImg, self.rotations, offset=render_scroll)
                 if kill: # if enemies update fn returns true [**]
                     self.enemies.remove(enemy) 
+                    self.score += 1
                 if self.player.rect().colliderect(enemy): # player collides with enemy
                     self.dead += 1 # die
                     self.sfx['hit'].play()
@@ -167,7 +168,7 @@ class Game:
 
             if self.dead != 1:
                 # update player movement
-                self.player.update(self.tilemap, (self.movement[1] - self.movement[0], self.movement[3] - self.movement[2]))
+                self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]) * self.player.speed, (self.movement[3] - self.movement[2]) * self.player.speed))
                 self.player.render(self.display,  self.playerImg, self.rotations, offset=render_scroll)
 
             # render/spawn bullet projectiles
@@ -195,7 +196,7 @@ class Game:
             #    hp_3.update()
             #    hp_3.render(self.display_black)
 
-            level_bar = Levelbar(self.level, pos=(self.display.get_width() // 2 - 25, 13))
+            level_bar = Levelbar(self.score, pos=(self.display.get_width() // 2 - 25, 13))
             level_bar.render(self.display, 22)
             
 
@@ -244,12 +245,30 @@ class Game:
             if self.right_key_pressed:
                 self.rotations = (self.rotations - 3 ) % 360
 
-            self.movement[2] = True
+            #self.movement[2] = True
+            if self.rotations > 90 and self.rotations < 180:
+                self.movement[0] = True
+                self.movement[3] = True
+                self.movement[1] = False
+                self.movement[2] = False
+            if self.rotations < 90 and self.rotations > 0:
+                self.movement[0] = True
+                self.movement[2] = True
+                self.movement[3] = False
+                self.movement[1] = False
+            if self.rotations > 180 and self.rotations < 270:
+                self.movement[1] = True 
+                self.movement[3] = True
+                self.movement[0] = False
+                self.movement[2] = False
+            if self.rotations > 270: # last case as to not activate unless actually in state
+                self.movement[1] = True
+                self.movement[2] = True
+                self.movement[0] = False
+                self.movement[3] = False
+
 
             self.display2.blit(self.display, (0, 0)) # black 
-
-            print(self.rotations)
-
 
 
             screenshake_offset = (random.random() * self.screenshake - self.screenshake / 2, random.random() * self.screenshake - self.screenshake / 2)
