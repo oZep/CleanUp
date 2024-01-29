@@ -96,7 +96,7 @@ class Game:
         # spawn the ememies
         self.enemies = [] # make this random generate and increase spawn # as game time goes on
 
-        for spawner in self.tilemap.extract([('spawners', 0), ('spawners', 1), ('spawners', 2), ('spawners', 3)]):
+        for spawner in self.tilemap.extract([('spawners', 0)]):
             if spawner['variant'] == 0: 
                 self.player.pos = spawner['pos']
             else:

@@ -92,13 +92,13 @@ class PhysicsEntity:
         self.animation.update() # update animation
 
 
-    def render(self, surf, images, rotation, offset={0,0}):
+    def render(self, surf, images, rotation, offset={0,0}, spread=1):
         '''
         partly overriding rendering for dashing
         '''
         for i, img in enumerate(images):
             rotated_img = pygame.transform.rotate(img, rotation)
-            surf.blit(rotated_img, (self.pos[0] - rotated_img.get_width() // 2, self.pos[1] - rotated_img.get_height() // 2))
+            surf.blit(rotated_img, (self.pos[0] - rotated_img.get_width() // 2, self.pos[1] - rotated_img.get_height() // 2 - i * spread))
 
 
 class Player(PhysicsEntity):
