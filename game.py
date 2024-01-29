@@ -223,8 +223,11 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a: # referencing WASD
                         self.movement[0] = True
+                        self.rotations += 0.05
                     if event.key == pygame.K_d:
                         self.movement[1] = True # make going forward alway constant
+                        self.rotations -= 0.05
+                    self.movement[2] = True
                 if event.type == pygame.KEYUP: # when key is released
                     if event.key == pygame.K_a: 
                         self.movement[0] = False
