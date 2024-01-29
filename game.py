@@ -35,8 +35,8 @@ class Game:
 
         self.assets = {
             'background': load_image('black.jpg'),
-            'player/idle': Animation(load_images('entities/player/idle'))
-            #'particle/particle': Animation(load_images('particles/particle'), img_dur=6, loop=False),
+            'player/idle': Animation(load_images('entities/player/idle')),
+            'particle/particle': Animation(load_images('particles/particle'), img_dur=6, loop=False),
         }
 
         # adding sound
@@ -63,6 +63,8 @@ class Game:
 
         # initalizing tilemap
         self.tilemap = Tilemap(self, tile_size=16)
+
+        self.sparks = []
 
         # tracking level
         self.level = 0
@@ -91,7 +93,7 @@ class Game:
         # creating 'camera' 
         self.scroll = [0, 0]
 
-        self.dead = -2  # gives player 3 lives, -2, -1, 0
+        self.dead = 0 # gives player 3 lives, -2, -1, 0
 
         # transition for levels
         self.transition = -30
@@ -151,17 +153,19 @@ class Game:
                     self.score += 1
                 if self.player.rect().colliderect(enemy): # player collides with enemy
                     self.dead += 1 # die
-                    self.sfx['hit'].play()
-                    self.cooldown = 150
-                    self.screenshake = max(16, self.screenshake)  # apply screenshake, larger wont be overrided by a smaller screenshake
-                    for i in range(30): # when projectile hits player
-                        # on death sparks
-                        angle = random.random() * math.pi * 2 # random angle in a circle
-                        speed = random.random() * 5
-                        self.sparks.append(Spark(self.player.rect().center, angle, 2 + random.random()))    # fix sparks
-                        # on death particles
-                        self.particles.append(Particle(self, 'particle', self.player.rect().center, velocity=[math.cos(angle + math.pi) * speed * 0.5, math.sin(angle * math.pi) * speed * 0.5], frame=random.randint(0, 7)))
-
+            
+            if self.dead:
+                self.sfx['hit'].play()
+                self.cooldown = 150
+                self.screenshake = max(16, self.screenshake)  # apply screenshake, larger wont be overrided by a smaller screenshake
+                for i in range(30): # when projectile hits player
+                    # on death sparks
+                    angle = random.random() * math.pi * 2 # random angle in a circle
+                    speed = random.random() * 5
+                    self.sparks.append(Spark(self.player.rect().center, angle, 2 + random.random()))    # fix sparks
+                    # on death particles
+                    self.particles.append(Particle(self, 'particle', self.player.rect().center, velocity=[math.cos(angle + math.pi) * speed * 0.5, math.sin(angle * math.pi) * speed * 0.5], frame=random.randint(0, 7)))
+        
 
             # Reduce timer
             if self.cooldown > 0:

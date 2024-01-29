@@ -125,19 +125,17 @@ class Player(PhysicsEntity):
 
         # Player boundary
         if self.pos[1] >= trueHeight:
+            self.game.dead += 1
             self.pos[1] = trueHeight
-        #if self.pos[1] < 0:
-        #    self.pos[1] = 0
-
-            #[50,60]
         if self.pos[0] < 50:
+            self.game.dead += 1
             self.pos[0] = 50
         if self.pos[1] < 60:
+            self.game.dead += 1
             self.pos[1] = 60
 
-        #if self.pos[0] < 0:
-        #    self.pos[0] = 0
         if self.pos[0] > trueWidth:
+            self.game.dead += 1
             self.pos[0] = trueWidth 
 
         print(self.pos)
