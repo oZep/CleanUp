@@ -18,13 +18,15 @@ class Game:
         '''
         pygame.init()
 
+        x = (1152, 648)
+
         # change the window caption
         pygame.display.set_caption("CleanUp!")
         # create window
         self.screen = pygame.display.set_mode((1140, 810)) # (640, 480), (960, 720), (768, 576)
-        self.display = pygame.Surface((1152, 648), pygame.SRCALPHA) # render on smaller resolution then scale it up to bigger screen
+        self.display = pygame.Surface(x, pygame.SRCALPHA) # render on smaller resolution then scale it up to bigger screen
 
-        self.display2 = pygame.Surface((1152, 648))
+        self.display2 = pygame.Surface(x)
 
 
         self.clock = pygame.time.Clock()
@@ -32,7 +34,7 @@ class Game:
         self.movement = [False, False, False, False]
 
         self.assets = {
-            'background': load_image('background.jpeg'),
+            'background': load_image('black.jpg'),
             'player/idle': Animation(load_images('entities/player/idle'))
             #'particle/particle': Animation(load_images('particles/particle'), img_dur=6, loop=False),
         }
