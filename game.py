@@ -35,6 +35,7 @@ class Game:
 
         self.assets = {
             'background': load_image('black.jpg'),
+            'enemy/idle': Animation(load_images('entities/enemy/idle')),
             'player/idle': Animation(load_images('entities/player/idle')),
             'particle/particle': Animation(load_images('particles/particle'), img_dur=6, loop=False),
         }
@@ -71,7 +72,6 @@ class Game:
         self.level = 0
         self.max_level = len(os.listdir('data/maps')) # max level,
         # loading the level
-        self.load_level(0)  # self.load_level(self.level), hard coding to 1 atm
 
         # screen shake
         self.screenshake = 0
@@ -87,7 +87,16 @@ class Game:
         self.enemies = [] 
         self.spawn_timer = 0
         self.spawn_interval = 40
-    
+
+        self.load_level(0)  # self.load_level(self.level), hard coding to 1 atm
+        
+        
+    def spawn_enemy(self):
+
+        x = random.randint(self.screen.get_width() + 30, 50)
+        y = random.randint(self.screen.get_height() + 20, 60)
+        self.enemies.append(Enemies(self, [x, y], (16, 16)))
+
 
     def load_level(self, map_id):
         self.tilemap.load('data/maps/' + str(map_id) + '.json')
@@ -117,16 +126,15 @@ class Game:
             if spawner['variant'] == 0: 
                 self.player.pos = [600, 400] # top left [50,60]   # middle [600, 400]
 
+        print("AHHHH")
 
-    def spawn_enemy(self):
-        x = random.randint(self.screen.get_width() + 30, 50)
-        y = random.randint(self.screen.get_height() + 20, 60)
-        self.enemies.append(Enemies(self, [x, y], (16, 16)))\
+
 
     def run(self):
         '''
         runs the Game
         '''
+
         #pygame.mixer.music.load('data/music.mp3')
         #pygame.mixer.music.set_volume(0.5)
         #pygame.mixer.music.play(-1)
@@ -139,6 +147,7 @@ class Game:
             self.display.fill((0,0,0,0))
             # clear the screen for new image generation in loop
             self.screen.blit(self.assets['background'], (0,0)) # no outline
+
 
             self.screenshake = max(0, self.screenshake-1) # resets screenshake value
 
@@ -165,13 +174,13 @@ class Game:
 
             self.tilemap.render(self.display, offset=render_scroll)
 
-
             # spawn enemies
-            #self.spawn_timer += 1
-            #if self.spawn_timer >= self.spawn_interval:
-            #    self.spawn_enemy()
-            #    self.spawn_timer = 0
-            #    self.spawn_interval = max(1000, self.spawn_interval - 100)
+            self.spawn_timer += 1
+            if self.spawn_timer >= self.spawn_interval:
+                self.spawn_enemy()
+                self.spawn_timer = 0
+                self.spawn_interval = max(1000, self.spawn_interval - 100)
+            
 
 
             # render the enemies
@@ -183,6 +192,7 @@ class Game:
                     self.score += 1
                 if self.player.rect().colliderect(enemy): # player collides with enemy
                     self.dead += 1 # die
+            
             
             if self.dead:
                 self.sfx['hit'].play()
@@ -210,7 +220,7 @@ class Game:
                 projectile[0][0] += projectile[1] 
                 projectile[2] += 1
                 img = self.assets['projectile']
-                self.display_black.blit(img if projectile[1] > 0 else pygame.transform.flip(img, True, False), (projectile[0][0] - img.get_width() / 2 - render_scroll[0], projectile[0][1] - img.get_height() / 2 - render_scroll[1])) # spawns it the center of the projectile
+                self.display.blit(img if projectile[1] > 0 else pygame.transform.flip(img, True, False), (projectile[0][0] - img.get_width() / 2 - render_scroll[0], projectile[0][1] - img.get_height() / 2 - render_scroll[1])) # spawns it the center of the projectile
                 
                 # keep this but change it to the borders of the map, also might want some obsticles later
                 if self.tilemap.solid_check(projectile[0]): # if location is a solid tile
@@ -277,17 +287,14 @@ class Game:
                 else: 
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_a: # referencing WASD
-                            self.rotations += 3
                             self.left_key_pressed = True
                         if event.key == pygame.K_d:
-                            self.rotations -= 3
                             self.right_key_pressed = True
                     elif event.type == pygame.KEYUP:
                         if event.key == pygame.K_a:
                             self.left_key_pressed = False
                         elif event.key == pygame.K_d:
                             self.right_key_pressed = False
-
 
             if self.left_key_pressed:
                 self.rotations = (self.rotations + 1.6 ) % 360
@@ -327,4 +334,4 @@ class Game:
             self.clock.tick(60) # run at 60 fps, like a sleep
 
 # returns the game then runs it
-Game().run
+Game().run()
