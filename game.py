@@ -9,7 +9,7 @@ from scripts.entities import PhysicsEntity, Player, Enemies
 from scripts.tilemap import Tilemap
 from scripts.particle import Particle
 from scripts.spark import Spark
-from scripts.UI import Heart, Levelbar
+from scripts.UI import Heart, Text
 
 class Game:
     def __init__(self):
@@ -83,10 +83,12 @@ class Game:
         self.score = 0
         self.left_key_pressed = False
         self.right_key_pressed = False
+        self.gameOver = 0
 
 
     def load_level(self, map_id):
         self.tilemap.load('data/maps/' + str(map_id) + '.json')
+        self.gameOver = 0
 
         # keep track
         self.particles = []
@@ -137,7 +139,16 @@ class Game:
                     self.transition = min(self.transition + 1, 30) # go as high as it can without changing level
                 if self.dead > 40: # timer that starts when you die
                     # self.level = 0
-                    self.load_level(self.level) # start at level 0 again. self.load_level(0)
+                    offsetText = 3
+                    replay = Text("Press L to Restart", pos=(self.display.get_width() /2 - 120, self.display.get_height() // 2 - 13))
+                    replay.render(self.display, 40)
+                    replay2 = Text("Press L to Restart", pos=(self.display.get_width() /2 - 120 + offsetText, self.display.get_height() // 2 - 13 + offsetText))
+                    replay2.render(self.display, 40, color=(255,255,255))
+                    self.rotations = 0 # rotations based on camera movement
+                    self.movement = [False, False, False, False]
+                    self.gameOver = 1
+
+
             
 
             # scroll = current scroll + (where we want the camera to be - what we have/can see currently) 
@@ -220,7 +231,7 @@ class Game:
             #    hp_3.update()
             #    hp_3.render(self.display_black)
 
-            level_bar = Levelbar(self.score, pos=(self.display.get_width() // 2 - 25, 13))
+            level_bar = Text("Score: " + str(self.score), pos=(self.display.get_width() // 2 -30, 13))
             level_bar.render(self.display, 22)
             
 
@@ -245,24 +256,27 @@ class Game:
                 if event.type == pygame.QUIT: # have to code the window closing
                     pygame.quit()
                     sys.exit()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_a: # referencing WASD
-                        self.rotations += 3
-                    if event.key == pygame.K_d:
-                        self.movement[1] = True # make going forward alway constant
-                        self.rotations -= 3
+                if self.gameOver:
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_l:
+                        self.load_level(self.level)
+                else: 
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_a: # referencing WASD
+                            self.rotations += 3
+                        if event.key == pygame.K_d:
+                            self.movement[1] = True # make going forward alway constant
+                            self.rotations -= 3
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_a:
+                            self.left_key_pressed = True
+                        elif event.key == pygame.K_d:
+                            self.right_key_pressed = True
+                    elif event.type == pygame.KEYUP:
+                        if event.key == pygame.K_a:
+                            self.left_key_pressed = False
+                        elif event.key == pygame.K_d:
+                            self.right_key_pressed = False
 
-
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_a:
-                        self.left_key_pressed = True
-                    elif event.key == pygame.K_d:
-                        self.right_key_pressed = True
-                elif event.type == pygame.KEYUP:
-                    if event.key == pygame.K_a:
-                        self.left_key_pressed = False
-                    elif event.key == pygame.K_d:
-                        self.right_key_pressed = False
 
             if self.left_key_pressed:
                 self.rotations = (self.rotations + 1.6 ) % 360
