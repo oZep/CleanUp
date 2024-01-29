@@ -167,12 +167,11 @@ class Game:
 
 
             # spawn enemies
-
-            self.spawn_timer += 1
-            if self.spawn_timer >= self.spawn_interval:
-                self.spawn_enemy()
-                self.spawn_timer = 0
-                self.spawn_interval = max(1000, self.spawn_interval - 100)
+            #self.spawn_timer += 1
+            #if self.spawn_timer >= self.spawn_interval:
+            #    self.spawn_enemy()
+            #    self.spawn_timer = 0
+            #    self.spawn_interval = max(1000, self.spawn_interval - 100)
 
 
             # render the enemies
@@ -279,12 +278,9 @@ class Game:
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_a: # referencing WASD
                             self.rotations += 3
-                        if event.key == pygame.K_d:
-                            self.movement[1] = True # make going forward alway constant
-                            self.rotations -= 3
-                        if event.key == pygame.K_a:
                             self.left_key_pressed = True
-                        elif event.key == pygame.K_d:
+                        if event.key == pygame.K_d:
+                            self.rotations -= 3
                             self.right_key_pressed = True
                     elif event.type == pygame.KEYUP:
                         if event.key == pygame.K_a:
@@ -326,6 +322,7 @@ class Game:
 
             screenshake_offset = (random.random() * self.screenshake - self.screenshake / 2, random.random() * self.screenshake - self.screenshake / 2)
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), screenshake_offset) # render (now scaled) display image on big screen
+            
             pygame.display.update()
             self.clock.tick(60) # run at 60 fps, like a sleep
 
