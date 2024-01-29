@@ -138,7 +138,6 @@ class Player(PhysicsEntity):
             self.game.dead += 1
             self.pos[0] = trueWidth 
 
-        print(self.pos)
  
             
 

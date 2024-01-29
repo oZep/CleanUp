@@ -65,6 +65,7 @@ class Game:
         self.tilemap = Tilemap(self, tile_size=16)
 
         self.sparks = []
+        self.projectiles = []
 
         # tracking level
         self.level = 0
@@ -94,6 +95,9 @@ class Game:
         self.scroll = [0, 0]
 
         self.dead = 0 # gives player 3 lives, -2, -1, 0
+
+        self.rotations = 0 # rotations based on camera movement
+        self.movement = [False, False, False, False]
 
         # transition for levels
         self.transition = -30
@@ -176,17 +180,32 @@ class Game:
                 self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]) * self.player.speed, (self.movement[3] - self.movement[2]) * self.player.speed))
                 self.player.render(self.display,  self.playerImg, self.rotations, offset=render_scroll, spread=1.2)
 
-            # render/spawn bullet projectiles
-            # [[x, y], direction, timer]
-            # make direction go based on angle
-            #for projectile in self.projectiles.copy():
-            #    projectile[0][0] += projectile[1] 
-            #    projectile[2] += 1
-            #    img = self.assets['projectile']
-            #    self.display_black.blit(img if projectile[1] > 0 else pygame.transform.flip(img, True, False), (projectile[0][0] - img.get_width() / 2 - render_scroll[0], projectile[0][1] - img.get_height() / 2 - render_scroll[1])) # spawns it the center of the projectile
+            for projectile in self.projectiles.copy():
+                projectile[0][0] += projectile[1] 
+                projectile[2] += 1
+                img = self.assets['projectile']
+                self.display_black.blit(img if projectile[1] > 0 else pygame.transform.flip(img, True, False), (projectile[0][0] - img.get_width() / 2 - render_scroll[0], projectile[0][1] - img.get_height() / 2 - render_scroll[1])) # spawns it the center of the projectile
                 
-            #    if projectile[2] > 360: #if timer > 6 seconds
-            #        self.projectiles.remove(projectile)
+                # keep this but change it to the borders of the map, also might want some obsticles later
+                if self.tilemap.solid_check(projectile[0]): # if location is a solid tile
+                    self.projectiles.remove(projectile)
+                    for i in range(4):
+                        self.sparks.append(Spark(projectile[0], random.random() - 0.5 + (math.pi if projectile[1] > 0 else 0), 2 + random.random())) # (math.pi if projectile[1] > 0 else 0), sparks bounce in oppositie direction if hit wall which depends on projectile direction
+                elif projectile[2] > 360: #if timer > 6 seconds
+                    self.projectiles.remove(projectile)
+                    if self.player.rect().collidepoint(projectile[0]):
+                        self.projectiles.remove(projectile)
+                        self.dead += 1
+                        self.sfx['hit'].play()
+                        self.screenshake = max(16, self.screenshake)  # apply screenshake, larger wont be overrided by a smaller screenshake
+                        for i in range(30): # when projectile hits player
+                            # on death sparks
+                            angle = random.random() * math.pi * 2 # random angle in a circle
+                            speed = random.random() * 5
+                            self.sparks.append(Spark(self.player.rect().center, angle, 2 + random.random())) 
+                            # on death particles
+                            self.particles.append(Particle(self, 'particle', self.player.rect().center, velocity=[math.cos(angle + math.pi) * speed * 0.5, math.sin(angle * math.pi) * speed * 0.5], frame=random.randint(0, 7)))
+           
                                     
             #hp_1 = Heart(self.assets['heart'].copy(), [13, 19], 15)
             #hp_2 = Heart(self.assets['heart'].copy(), [30, 19], 15)
@@ -246,9 +265,9 @@ class Game:
                         self.right_key_pressed = False
 
             if self.left_key_pressed:
-                self.rotations = (self.rotations + 1 ) % 360
+                self.rotations = (self.rotations + 1.6 ) % 360
             if self.right_key_pressed:
-                self.rotations = (self.rotations - 1 ) % 360
+                self.rotations = (self.rotations - 1.6 ) % 360
 
             #self.movement[2] = True
             if self.rotations > 90 and self.rotations < 180:
