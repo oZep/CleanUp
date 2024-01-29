@@ -84,7 +84,8 @@ class Game:
         self.left_key_pressed = False
         self.right_key_pressed = False
         self.gameOver = 0
-
+        self.enemies = [] 
+    
 
     def load_level(self, map_id):
         self.tilemap.load('data/maps/' + str(map_id) + '.json')
@@ -110,9 +111,12 @@ class Game:
         for spawner in self.tilemap.extract([('spawners', 0)]):
             if spawner['variant'] == 0: 
                 self.player.pos = [600, 400] # top left [50,60]   # middle [600, 400]
-            else:
-                self.enemies.append(Enemies(self, spawner['pos'], (21, 31)))
-                # spawn the ememies, make random
+
+
+    def spawn_enemy(self):
+        x = random.randint(self.screen.get_width() + 30, 50)
+        y = random.randint(self.screen.get_height() + 20, 60)
+        self.enemies.append(Enemies(self, [x, y], (16, 16)))\
 
     def run(self):
         '''
@@ -148,9 +152,6 @@ class Game:
                     self.movement = [False, False, False, False]
                     self.gameOver = 1
 
-
-            
-
             # scroll = current scroll + (where we want the camera to be - what we have/can see currently) 
             self.scroll[0] = self.display.get_width()/ 2 / 30 
             self.scroll[1] = self.display.get_height()/ 2
@@ -158,6 +159,16 @@ class Game:
             render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
 
             self.tilemap.render(self.display, offset=render_scroll)
+
+
+            # spawn enemies
+
+            self.spawn_timer += 1
+            if self.spawn_timer >= self.spawn_interval:
+                self.spawn_enemy()
+                self.spawn_timer = 0
+                self.spawn_interval = max(1000, self.spawn_interval - 100)
+
 
             # render the enemies
             for enemy in self.enemies.copy():
@@ -315,4 +326,4 @@ class Game:
             self.clock.tick(60) # run at 60 fps, like a sleep
 
 # returns the game then runs it
-Game().run()
+Game().run

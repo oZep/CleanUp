@@ -148,25 +148,11 @@ class Enemies(PhysicsEntity):
         (game, position: tuple, size)
         '''
         super().__init__(game, 'skele', pos, size)
-        self.walking = 1
-        self.speed = 1 # enemy speed
-        self.timer = 0 # enemy shooting timer
+        self.rotation = 0
     
     def update(self, tilemap, movement=(0,0)):
-        if self.walking:
-            # Using the distance formula
-            dis = pygame.math.Vector2(self.game.player.pos[0] - self.pos[0], self.game.player.pos[1] - self.pos[1])
-            distance = dis.length()            
-            if distance >= 30:
-                angle = math.atan2(dis.y, dis.x)
-                movement = (math.cos(angle) * self.speed, math.sin(angle) * self.speed)
-                self.walking = True
-        elif random.random() < 0.01: # 1 in every 6.1 seconds
-            self.walking = random.randint(30, 120)
-        
-        # Reduce timer
-        if self.timer > 0:
-            self.timer -= 1
+        self.rotation = (self.rotation + 1) % 360
+
        
         super().update(tilemap, movement=movement)
 
