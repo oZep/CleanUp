@@ -98,7 +98,7 @@ class PhysicsEntity:
         '''
         for i, img in enumerate(images):
             rotated_img = pygame.transform.rotate(img, rotation)
-            surf.blit(rotated_img, (self.pos[0] - rotated_img.get_width() // 2, self.pos[1] - rotated_img.get_height() // 2 - i * spread))
+            surf.blit(rotated_img, (self.pos[0] - rotated_img.get_width()  - offset[0] + self.anim_offset[0] // 2, self.pos[1] - rotated_img.get_height()  - offset[0] + self.anim_offset[0] // 2 - i * spread))
 
 
 class Player(PhysicsEntity):

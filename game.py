@@ -77,6 +77,7 @@ class Game:
         self.angle_count = 0
         self.horizontal_count = 0
         self.rotations = 0 # rotations based on camera movement
+        self.score = 0
 
 
     def load_level(self, map_id):
