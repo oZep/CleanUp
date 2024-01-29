@@ -101,7 +101,7 @@ class Game:
 
         for spawner in self.tilemap.extract([('spawners', 0)]):
             if spawner['variant'] == 0: 
-                self.player.pos = [600, 400]
+                self.player.pos = [600, 400] # top left [50,60]   # middle [600, 400]
             else:
                 self.enemies.append(Enemies(self, spawner['pos'], (21, 31)))
                 # spawn the ememies, make random
@@ -170,7 +170,7 @@ class Game:
             if self.dead != 1:
                 # update player movement
                 self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]) * self.player.speed, (self.movement[3] - self.movement[2]) * self.player.speed))
-                self.player.render(self.display,  self.playerImg, self.rotations, offset=render_scroll)
+                self.player.render(self.display,  self.playerImg, self.rotations, offset=render_scroll, spread=1.2)
 
             # render/spawn bullet projectiles
             # [[x, y], direction, timer]
