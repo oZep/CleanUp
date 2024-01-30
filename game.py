@@ -132,9 +132,11 @@ class Game:
         for spawner in self.tilemap.extract([('spawners', 0)]):
             if spawner['variant'] == 0: 
                 self.player.pos = [600, 400] # top left [50,60]   # middle [600, 400]
-                self.player.velocity = [0,0]
+                # reset movement
                 self.rotations = 0 # rotations based on camera movement
                 self.movement = [False, False, False, False]
+                self.left_key_pressed = False
+                self.right_key_pressed = False
 
 
     def run(self):
