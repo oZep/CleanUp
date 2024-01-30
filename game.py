@@ -211,7 +211,7 @@ class Game:
             self.tilemap.render(self.display, offset=render_scroll)
 
             # spawn enemies
-            if self.start:
+            if self.start and len(self.enemies) < 50:
                 self.spawn_timer += random.random() * self.score
                 if self.spawn_timer >= self.spawn_interval and not self.dead:
                     self.spawn_enemy()
