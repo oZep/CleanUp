@@ -98,8 +98,12 @@ class Game:
         
     def spawn_enemy(self):
 
+
+        #for i in range(0,):
+        #    if i == 0:
         x = random.randint(50, self.screen.get_width() - 50)
         y = random.randint(60, self.screen.get_height() + 20)
+
 
         self.enemies.append(Enemies(self, [x, y], [16, 16]))
 
@@ -195,20 +199,32 @@ class Game:
 
             self.enemyRotation = (self.enemyRotation + 1) % 360
 
+
+            trueWidth =  self.screen.get_width() + 30
+            trueHeight = self.screen.get_height() + 20
+
             # render the enemies
             for enemy in self.enemies.copy():
-                kill =  enemy.update(self.tilemap, (0,0))
+                kill =  enemy.update(self.tilemap, (1,1))
                 enemy.render(self.display, self.enemyImg, self.enemyRotation, offset=render_scroll)
-                pygame.draw.rect(self.display, (255, 0, 0), (enemy.pos[0] - render_scroll[0] - 30, enemy.pos[1] - render_scroll[1] - 30, enemy.size[0], enemy.size[1]), 3)
+                pygame.draw.rect(self.display, (255, 0, 0), (enemy.pos[0] - render_scroll[0] - 30, enemy.pos[1] - render_scroll[1] - 40, enemy.size[0], enemy.size[1]), 3)
                 if kill: # if enemies update fn returns true [**]d
                     self.enemies.remove(enemy) 
                     self.score += 1
+                if enemy.pos[1] >= trueHeight:
+                    self.enemies.remove(enemy) 
+                if enemy.pos[0] < 50:
+                     self.enemies.remove(enemy)
+                if enemy.pos[1] < 60:
+                     self.enemies.remove(enemy) 
+                if enemy.pos[0] > trueWidth:
+                    self.enemies.remove(enemy) 
                 if self.player.rect().colliderect(enemy): # player collides with enemy
                     self.dead += 1 # die
             
             
             if self.dead:
-                self.sfx['hit'].play()
+                # self.sfx['hit'].play()
                 self.cooldown = 150
                 self.screenshake = max(16, self.screenshake)  # apply screenshake, larger wont be overrided by a smaller screenshake
                 for i in range(30): # when projectile hits player
@@ -226,6 +242,7 @@ class Game:
                 self.score = self.counter // 60
                 self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]) * self.player.speed, (self.movement[3] - self.movement[2]) * self.player.speed))
             self.player.render(self.display,  self.playerImg, self.rotations, offset=render_scroll, spread=1.2)
+            #pygame.draw.rect(self.display, (255, 255, 0), (self.player.pos[0] - render_scroll[0] - 33, self.player.pos[1] - render_scroll[1] - 50, self.player.size[0], self.player.size[1]), 3)
 
             for projectile in self.projectiles.copy():
                 projectile[0][0] += projectile[1] 

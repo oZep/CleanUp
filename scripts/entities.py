@@ -137,6 +137,12 @@ class Player(PhysicsEntity):
             self.game.dead += 1
             self.pos[0] = trueWidth 
 
+    def rect(self):
+        '''
+        creates a rectangle at the entitiies current postion
+        '''
+        return pygame.Rect(self.pos[0] - 33, self.pos[1] - 50, self.size[0], self.size[1])
+
  
             
 
@@ -163,7 +169,14 @@ class Enemies(PhysicsEntity):
                 self.game.particles.append(Particle(self.game, 'particle', self.rect().center, velocity=[math.cos(angle + math.pi) * speed * 0.5, math.sin(angle * math.pi) * speed * 0.5], frame=random.randint(0, 7)))
             self.game.sparks.append(Spark(self.rect().center, 0, 5 + random.random())) # left
             self.game.sparks.append(Spark(self.rect().center, math.pi, 5 + random.random())) # right
+
             return True # [**]
+        
+    def rect(self):
+        '''
+        creates a rectangle at the entitiies current postion
+        '''
+        return pygame.Rect(self.pos[0] - 30, self.pos[1] - 40, self.size[0], self.size[1])
     
     def render(self, surf, images, rotation, offset={0,0}, spread=1):
         super().render(surf, images, rotation=rotation, offset=offset, spread=1)
