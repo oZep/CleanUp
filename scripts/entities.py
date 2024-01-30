@@ -167,4 +167,4 @@ class Enemies(PhysicsEntity):
             return True # [**]
     
     def render(self, surf, images, rotation, offset={0,0}, spread=1):
-        super().render(surf, images, rotation=rotation, offset={}, spread=1)
+        super().render(surf, images, rotation=rotation, offset=offset, spread=1)

@@ -95,10 +95,10 @@ class Game:
         
     def spawn_enemy(self):
 
-        #x = random.randint(50, self.screen.get_width() - 50)
-        #y = random.randint(60, self.screen.get_height() + 20)
+        x = random.randint(50, self.screen.get_width() - 50)
+        y = random.randint(60, self.screen.get_height() + 20)
 
-        self.enemies.append(Enemies(self, [50, 60], [16, 16]))
+        self.enemies.append(Enemies(self, [x, y], [16, 16]))
 
     def load_level(self, map_id):
         self.tilemap.load('data/maps/' + str(map_id) + '.json')
