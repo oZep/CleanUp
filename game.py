@@ -91,6 +91,7 @@ class Game:
         self.enemyRotation = 0
 
         self.counter = 0
+        self.start = 0
 
         self.load_level(0)  # self.load_level(self.level), hard coding to 1 atm
         
@@ -125,6 +126,7 @@ class Game:
 
         self.score = 0
         self.counter = 0
+        self.start = 0 # dont spawn enemies until player moves
 
         # spawn the ememies
         self.enemies = [] # clear enemies
@@ -184,7 +186,8 @@ class Game:
             self.tilemap.render(self.display, offset=render_scroll)
 
             # spawn enemies
-            self.spawn_timer += 1
+            if self.start:
+                self.spawn_timer += 1
             if self.spawn_timer >= self.spawn_interval and not self.dead:
                 self.spawn_enemy()
                 self.spawn_timer = 0
@@ -294,6 +297,7 @@ class Game:
                         self.load_level(self.level)
                 else: 
                     if event.type == pygame.KEYDOWN:
+                        self.start = 1
                         if event.key == pygame.K_a: # referencing WASD
                             self.left_key_pressed = True
                         if event.key == pygame.K_d:
