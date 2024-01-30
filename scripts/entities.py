@@ -108,7 +108,7 @@ class Player(PhysicsEntity):
         (game, position, size)
         '''
         super().__init__(game,'player', pos, size)
-        self.speed = 2.5
+        self.speed = 2.2
 
     def update(self, tilemap, movement=(0,0)):
         '''
@@ -153,6 +153,42 @@ class Enemies(PhysicsEntity):
         (game, position: tuple, size)
         '''
         super().__init__(game, 'enemy', pos, size)
+    
+    def update(self, tilemap, movement=(0,0)):
+        super().update(tilemap, movement=movement)
+
+        if self.rect().colliderect(self.game.player.rect()): # if enemy hitbox collides with player
+            self.game.screenshake = max(16, self.game.screenshake)  # apply screenshake
+            self.game.sfx['hit'].play()
+            for i in range(30): # enemy death effect
+                # on death sparks
+                angle = random.random() * math.pi * 2 # random angle in a circle
+                speed = random.random() * 5
+                self.game.sparks.append(Spark(self.rect().center, angle, 2 + random.random())) 
+                # on death particles
+                self.game.particles.append(Particle(self.game, 'particle', self.rect().center, velocity=[math.cos(angle + math.pi) * speed * 0.5, math.sin(angle * math.pi) * speed * 0.5], frame=random.randint(0, 7)))
+            self.game.sparks.append(Spark(self.rect().center, 0, 5 + random.random())) # left
+            self.game.sparks.append(Spark(self.rect().center, math.pi, 5 + random.random())) # right
+
+            return True # [**]
+        
+    def rect(self):
+        '''
+        creates a rectangle at the entitiies current postion
+        '''
+        return pygame.Rect(self.pos[0] - 30, self.pos[1] - 40, self.size[0], self.size[1])
+    
+    def render(self, surf, images, rotation, offset={0,0}, spread=1):
+        super().render(surf, images, rotation=rotation, offset=offset, spread=1)
+
+
+class Boss(PhysicsEntity):
+    def __init__(self, game, pos, size):
+        '''
+        instantiates the enemies
+        (game, position: tuple, size)
+        '''
+        super().__init__(game, 'boss', pos, size)
     
     def update(self, tilemap, movement=(0,0)):
         super().update(tilemap, movement=movement)

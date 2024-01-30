@@ -5,7 +5,7 @@ import random
 import pygame
 
 from scripts.utils import load_image, load_images, Animation
-from scripts.entities import PhysicsEntity, Player, Enemies
+from scripts.entities import Player, Enemies, Boss
 from scripts.tilemap import Tilemap
 from scripts.particle import Particle
 from scripts.spark import Spark
@@ -35,6 +35,7 @@ class Game:
 
         self.assets = {
             'background': load_image('black.jpg'),
+            'boss/idle': Animation(load_images('entities/boss/idle')),
             'enemy/idle': Animation(load_images('entities/enemy/idle')),
             'player/idle': Animation(load_images('entities/player/idle')),
             'particle/particle': Animation(load_images('particles/particle'), img_dur=6, loop=False),
@@ -51,6 +52,7 @@ class Game:
 
         self.playerImg = load_images('entities/player/idle')
         self.enemyImg = load_images('entities/enemy/idle') # just make shooting particle effects
+        self.bossImg = load_images('entities/boss/idle')
         
         self.sfx['ambience'].set_volume(0.2)
         self.sfx['shoot'].set_volume(0.4)
@@ -85,6 +87,7 @@ class Game:
         self.right_key_pressed = False
         self.gameOver = 0
         self.enemies = [] 
+        self.bosses = []
         self.spawn_timer = 0
         self.spawn_interval = 10
 
@@ -107,6 +110,23 @@ class Game:
             y = random.randint(60, self.screen.get_height() + 20)
 
         self.enemies.append(Enemies(self, [x, y], [16, 16]))
+
+            
+    def spawn_boss(self):
+        i = random.randint(0, 8)
+        if i == 1:
+            x = random.randint(50, self.screen.get_width() - 50)
+            y = 60
+            self.bosses.append(Boss(self, [x, y], [16, 16]))
+        elif i == 0:
+            x = 50
+            y = random.randint(60, self.screen.get_height() + 20)
+            self.bosses.append(Boss(self, [x, y], [16, 16]))
+        
+        else:
+            pass
+
+        
 
     def load_level(self, map_id):
         self.tilemap.load('data/maps/' + str(map_id) + '.json')
@@ -135,6 +155,7 @@ class Game:
 
         # spawn the ememies
         self.enemies = [] # clear enemies
+        self.bosses = []
 
         for spawner in self.tilemap.extract([('spawners', 0)]):
             if spawner['variant'] == 0: 
@@ -192,11 +213,12 @@ class Game:
             # spawn enemies
             if self.start:
                 self.spawn_timer += random.random() * self.score
-            if self.spawn_timer >= self.spawn_interval and not self.dead:
-                self.spawn_enemy()
-                self.spawn_interval = max(30, self.spawn_interval - self.spawn_timer)
-                self.spawn_timer = 0
-                
+                if self.spawn_timer >= self.spawn_interval and not self.dead:
+                    self.spawn_enemy()
+                    self.spawn_interval = max(40, self.spawn_interval - self.spawn_timer)
+                    self.spawn_timer = 0
+                    if self.score > 10:
+                        self.spawn_boss()
 
 
             self.enemyRotation = (self.enemyRotation + 1) % 360
@@ -224,7 +246,25 @@ class Game:
                 if self.player.rect().colliderect(enemy): # player collides with enemy
                     self.dead += 1 # die
             
+            for enemy in self.bosses.copy():
+                kill =  enemy.update(self.tilemap, (3,3))
+                enemy.render(self.display, self.bossImg, 240, offset=render_scroll)
+                #pygame.draw.rect(self.display, (255, 0, 0), (enemy.pos[0] - render_scroll[0] - 30, enemy.pos[1] - render_scroll[1] - 40, enemy.size[0], enemy.size[1]), 3)
+                if kill: # if enemies update fn returns true [**]d
+                    self.bosses.remove(enemy) 
+                    self.score += 1
+                if enemy.pos[1] >= trueHeight:
+                    self.bosses.remove(enemy) 
+                if enemy.pos[0] < 50:
+                     self.bosses.remove(enemy)
+                if enemy.pos[1] < 60:
+                     self.bosses.remove(enemy) 
+                if enemy.pos[0] > trueWidth:
+                    self.bosses.remove(enemy) 
+                if self.player.rect().colliderect(enemy): # player collides with enemy
+                    self.dead += 1 # die
             
+
             if self.dead:
                 # self.sfx['hit'].play()
                 self.cooldown = 150
@@ -243,7 +283,7 @@ class Game:
                 self.counter += 1
                 self.score = self.counter // 60
                 self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]) * self.player.speed, (self.movement[3] - self.movement[2]) * self.player.speed))
-            self.player.render(self.display,  self.playerImg, self.rotations, offset=render_scroll, spread=1.2)
+            self.player.render(self.display,  self.playerImg, self.rotations, offset=render_scroll, spread=1.1)
             #pygame.draw.rect(self.display, (255, 255, 0), (self.player.pos[0] - render_scroll[0] - 33, self.player.pos[1] - render_scroll[1] - 50, self.player.size[0], self.player.size[1]), 3)
 
             for projectile in self.projectiles.copy():
@@ -316,11 +356,12 @@ class Game:
                         self.load_level(self.level)
                 else: 
                     if event.type == pygame.KEYDOWN:
-                        self.start = 1
                         if event.key == pygame.K_a: # referencing WASD
                             self.left_key_pressed = True
+                            self.start = 1
                         if event.key == pygame.K_d:
                             self.right_key_pressed = True
+                            self.start = 1
                     elif event.type == pygame.KEYUP:
                         if event.key == pygame.K_a:
                             self.left_key_pressed = False
