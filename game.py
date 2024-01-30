@@ -97,13 +97,14 @@ class Game:
         
         
     def spawn_enemy(self):
+        i = random.randint(0, 1)
+        if i == 1:
+            x = random.randint(50, self.screen.get_width() - 50)
+            y = 60
 
-
-        #for i in range(0,):
-        #    if i == 0:
-        x = random.randint(50, self.screen.get_width() - 50)
-        y = random.randint(60, self.screen.get_height() + 20)
-
+        if i == 0:
+            x = 50
+            y = random.randint(60, self.screen.get_height() + 20)
 
         self.enemies.append(Enemies(self, [x, y], [16, 16]))
 
@@ -190,11 +191,12 @@ class Game:
 
             # spawn enemies
             if self.start:
-                self.spawn_timer += 1
+                self.spawn_timer += random.random() * self.score
             if self.spawn_timer >= self.spawn_interval and not self.dead:
                 self.spawn_enemy()
+                self.spawn_interval = max(30, self.spawn_interval - self.spawn_timer)
                 self.spawn_timer = 0
-                self.spawn_interval =  30 #make dynamic
+                
 
 
             self.enemyRotation = (self.enemyRotation + 1) % 360
