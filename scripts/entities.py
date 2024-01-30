@@ -108,7 +108,7 @@ class Player(PhysicsEntity):
         (game, position, size)
         '''
         super().__init__(game,'player', pos, size)
-        self.speed = 3
+        self.speed = 2.5
 
     def update(self, tilemap, movement=(0,0)):
         '''
