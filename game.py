@@ -154,7 +154,6 @@ class Game:
 
         # creating an infinite game loop
         while True:
-            self.counter += 1
             self.display.fill((0, 0, 0, 0))    # black outlines
             self.display.fill((0,0,0,0))
             # clear the screen for new image generation in loop
@@ -221,8 +220,9 @@ class Game:
                     self.particles.append(Particle(self, 'particle', self.player.rect().center, velocity=[math.cos(angle + math.pi) * speed * 0.5, math.sin(angle * math.pi) * speed * 0.5], frame=random.randint(0, 7)))
         
 
-            if not self.dead:
-                # update player movement
+            if not self.dead and self.start == 1:
+                # update player movement and score counter
+                self.counter += 1
                 self.score = self.counter // 60
                 self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]) * self.player.speed, (self.movement[3] - self.movement[2]) * self.player.speed))
             self.player.render(self.display,  self.playerImg, self.rotations, offset=render_scroll, spread=1.2)
