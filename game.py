@@ -207,7 +207,7 @@ class Game:
             for enemy in self.enemies.copy():
                 kill =  enemy.update(self.tilemap, (1,1))
                 enemy.render(self.display, self.enemyImg, self.enemyRotation, offset=render_scroll)
-                pygame.draw.rect(self.display, (255, 0, 0), (enemy.pos[0] - render_scroll[0] - 30, enemy.pos[1] - render_scroll[1] - 40, enemy.size[0], enemy.size[1]), 3)
+                #pygame.draw.rect(self.display, (255, 0, 0), (enemy.pos[0] - render_scroll[0] - 30, enemy.pos[1] - render_scroll[1] - 40, enemy.size[0], enemy.size[1]), 3)
                 if kill: # if enemies update fn returns true [**]d
                     self.enemies.remove(enemy) 
                     self.score += 1
