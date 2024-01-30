@@ -122,7 +122,6 @@ class Player(PhysicsEntity):
         trueWidth =  self.game.screen.get_width() + 30
         trueHeight = self.game.screen.get_height() + 20
 
-
         # Player boundary
         if self.pos[1] >= trueHeight:
             self.game.dead += 1

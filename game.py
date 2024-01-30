@@ -132,6 +132,9 @@ class Game:
         for spawner in self.tilemap.extract([('spawners', 0)]):
             if spawner['variant'] == 0: 
                 self.player.pos = [600, 400] # top left [50,60]   # middle [600, 400]
+                self.player.velocity = [0,0]
+                self.rotations = 0 # rotations based on camera movement
+                self.movement = [False, False, False, False]
 
 
     def run(self):
@@ -159,8 +162,8 @@ class Game:
             if self.dead >= 1: # get hit 3 times
                 self.dead += 1
                 if self.dead >= 10: # to make the level transitions smoother
-                    self.transition = min(self.transition + 1, 30) # go as high as it can without changing level
-                if self.dead > 40: # timer that starts when you die
+                    self.transition = min(self.transition + 1, 20) # go as high as it can without changing level
+                if self.dead > 30: # timer that starts when you die
                     # self.level = 0
                     offsetText = 3
                     replay = Text("Press L to Restart", pos=(self.display.get_width() /2 - 120, self.display.get_height() // 2 - 13))
@@ -194,6 +197,7 @@ class Game:
             for enemy in self.enemies.copy():
                 kill =  enemy.update(self.tilemap, (0,0))
                 enemy.render(self.display, self.enemyImg, self.enemyRotation, offset=render_scroll)
+                pygame.draw.rect(self.display, (255, 0, 0), (enemy.pos[0] - render_scroll[0] - 30, enemy.pos[1] - render_scroll[1] - 30, enemy.size[0], enemy.size[1]), 3)
                 if kill: # if enemies update fn returns true [**]d
                     self.enemies.remove(enemy) 
                     self.score += 1
