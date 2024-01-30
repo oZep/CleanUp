@@ -86,17 +86,19 @@ class Game:
         self.gameOver = 0
         self.enemies = [] 
         self.spawn_timer = 0
-        self.spawn_interval = 40
+        self.spawn_interval = 10
+
+        self.enemyRotation = 0
 
         self.load_level(0)  # self.load_level(self.level), hard coding to 1 atm
         
         
     def spawn_enemy(self):
 
-        x = random.randint(self.screen.get_width() + 30, 50)
-        y = random.randint(self.screen.get_height() + 20, 60)
-        self.enemies.append(Enemies(self, [x, y], (16, 16)))
+        #x = random.randint(50, self.screen.get_width() - 50)
+        #y = random.randint(60, self.screen.get_height() + 20)
 
+        self.enemies.append(Enemies(self, [50, 60], [16, 16]))
 
     def load_level(self, map_id):
         self.tilemap.load('data/maps/' + str(map_id) + '.json')
@@ -117,7 +119,7 @@ class Game:
         self.transition = -30
 
         self.spawn_timer = 0
-        self.spawn_interval = 40
+        self.spawn_interval = 100
         
         # spawn the ememies
         self.enemies = [] # clear enemies
@@ -125,9 +127,6 @@ class Game:
         for spawner in self.tilemap.extract([('spawners', 0)]):
             if spawner['variant'] == 0: 
                 self.player.pos = [600, 400] # top left [50,60]   # middle [600, 400]
-
-        print("AHHHH")
-
 
 
     def run(self):
@@ -168,7 +167,7 @@ class Game:
 
             # scroll = current scroll + (where we want the camera to be - what we have/can see currently) 
             self.scroll[0] = self.display.get_width()/ 2 / 30 
-            self.scroll[1] = self.display.get_height()/ 2
+            self.scroll[1] = self.display.get_height()/ 2 / 30
             # fix the jitter
             render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
 
@@ -177,17 +176,19 @@ class Game:
             # spawn enemies
             self.spawn_timer += 1
             if self.spawn_timer >= self.spawn_interval:
+                print("Hi Enemy spawned")
                 self.spawn_enemy()
                 self.spawn_timer = 0
-                self.spawn_interval = max(1000, self.spawn_interval - 100)
-            
+                self.spawn_interval =  30 #make dynamic
 
+
+            self.enemyRotation = (self.enemyRotation + 1) % 360
 
             # render the enemies
             for enemy in self.enemies.copy():
                 kill =  enemy.update(self.tilemap, (0,0))
-                enemy.render(self.display, self.enemyImg, self.rotations, offset=render_scroll)
-                if kill: # if enemies update fn returns true [**]
+                enemy.render(self.display, self.enemyImg, self.enemyRotation, offset=render_scroll)
+                if kill: # if enemies update fn returns true [**]d
                     self.enemies.remove(enemy) 
                     self.score += 1
                 if self.player.rect().colliderect(enemy): # player collides with enemy
@@ -206,10 +207,6 @@ class Game:
                     # on death particles
                     self.particles.append(Particle(self, 'particle', self.player.rect().center, velocity=[math.cos(angle + math.pi) * speed * 0.5, math.sin(angle * math.pi) * speed * 0.5], frame=random.randint(0, 7)))
         
-
-            # Reduce timer
-            if self.cooldown > 0:
-                    self.cooldown -= 1
 
             if self.dead != 1:
                 # update player movement

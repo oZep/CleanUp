@@ -147,13 +147,9 @@ class Enemies(PhysicsEntity):
         instantiates the enemies
         (game, position: tuple, size)
         '''
-        super().__init__(game, 'skele', pos, size)
-        self.rotation = 0
+        super().__init__(game, 'enemy', pos, size)
     
     def update(self, tilemap, movement=(0,0)):
-        self.rotation = (self.rotation + 1) % 360
-
-       
         super().update(tilemap, movement=movement)
 
         if self.rect().colliderect(self.game.player.rect()): # if enemy hitbox collides with player
@@ -169,5 +165,6 @@ class Enemies(PhysicsEntity):
             self.game.sparks.append(Spark(self.rect().center, 0, 5 + random.random())) # left
             self.game.sparks.append(Spark(self.rect().center, math.pi, 5 + random.random())) # right
             return True # [**]
-            
-
+    
+    def render(self, surf, images, rotation, offset={0,0}, spread=1):
+        super().render(surf, images, rotation=rotation, offset={}, spread=1)
