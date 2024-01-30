@@ -90,6 +90,8 @@ class Game:
 
         self.enemyRotation = 0
 
+        self.counter = 0
+
         self.load_level(0)  # self.load_level(self.level), hard coding to 1 atm
         
         
@@ -120,7 +122,10 @@ class Game:
 
         self.spawn_timer = 0
         self.spawn_interval = 100
-        
+
+        self.score = 0
+        self.counter = 0
+
         # spawn the ememies
         self.enemies = [] # clear enemies
 
@@ -142,6 +147,7 @@ class Game:
 
         # creating an infinite game loop
         while True:
+            self.counter += 1
             self.display.fill((0, 0, 0, 0))    # black outlines
             self.display.fill((0,0,0,0))
             # clear the screen for new image generation in loop
@@ -212,6 +218,7 @@ class Game:
                 # update player movement
                 self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]) * self.player.speed, (self.movement[3] - self.movement[2]) * self.player.speed))
                 self.player.render(self.display,  self.playerImg, self.rotations, offset=render_scroll, spread=1.2)
+                self.score = self.counter // 60
 
             for projectile in self.projectiles.copy():
                 projectile[0][0] += projectile[1] 
@@ -252,7 +259,7 @@ class Game:
             #if self.dead <= -2:
             #    hp_3.update()
             #    hp_3.render(self.display_black)
-
+            
             level_bar = Text("Score: " + str(self.score), pos=(self.display.get_width() // 2 -30, 13))
             level_bar.render(self.display, 22)
             
