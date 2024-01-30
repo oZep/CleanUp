@@ -132,7 +132,7 @@ class Game:
         for spawner in self.tilemap.extract([('spawners', 0)]):
             if spawner['variant'] == 0: 
                 self.player.pos = [600, 400] # top left [50,60]   # middle [600, 400]
-                # reset movement
+                # reset
                 self.rotations = 0 # rotations based on camera movement
                 self.movement = [False, False, False, False]
                 self.left_key_pressed = False
@@ -161,7 +161,7 @@ class Game:
 
             self.screenshake = max(0, self.screenshake-1) # resets screenshake value
 
-            if self.dead >= 1: # get hit 3 times
+            if self.dead: 
                 self.dead += 1
                 if self.dead >= 10: # to make the level transitions smoother
                     self.transition = min(self.transition + 1, 20) # go as high as it can without changing level
@@ -172,7 +172,6 @@ class Game:
                     replay.render(self.display, 40)
                     replay2 = Text("Press L to Restart", pos=(self.display.get_width() /2 - 120 + offsetText, self.display.get_height() // 2 - 13 + offsetText))
                     replay2.render(self.display, 40, color=(255,255,255))
-                    self.rotations = 0 # rotations based on camera movement
                     self.movement = [False, False, False, False]
                     self.gameOver = 1
 
@@ -186,8 +185,7 @@ class Game:
 
             # spawn enemies
             self.spawn_timer += 1
-            if self.spawn_timer >= self.spawn_interval:
-                print("Hi Enemy spawned")
+            if self.spawn_timer >= self.spawn_interval and not self.dead:
                 self.spawn_enemy()
                 self.spawn_timer = 0
                 self.spawn_interval =  30 #make dynamic
@@ -220,11 +218,11 @@ class Game:
                     self.particles.append(Particle(self, 'particle', self.player.rect().center, velocity=[math.cos(angle + math.pi) * speed * 0.5, math.sin(angle * math.pi) * speed * 0.5], frame=random.randint(0, 7)))
         
 
-            if self.dead != 1:
+            if not self.dead:
                 # update player movement
-                self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]) * self.player.speed, (self.movement[3] - self.movement[2]) * self.player.speed))
-                self.player.render(self.display,  self.playerImg, self.rotations, offset=render_scroll, spread=1.2)
                 self.score = self.counter // 60
+                self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]) * self.player.speed, (self.movement[3] - self.movement[2]) * self.player.speed))
+            self.player.render(self.display,  self.playerImg, self.rotations, offset=render_scroll, spread=1.2)
 
             for projectile in self.projectiles.copy():
                 projectile[0][0] += projectile[1] 
