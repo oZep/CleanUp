@@ -34,7 +34,7 @@ class Game:
         self.movement = [False, False, False, False]
 
         self.assets = {
-            'background': load_image('black.jpg'),
+            'background': load_image('black.png'),
             'boss/idle': Animation(load_images('entities/boss/idle')),
             'enemy/idle': Animation(load_images('entities/enemy/idle')),
             'player/idle': Animation(load_images('entities/player/idle')),
