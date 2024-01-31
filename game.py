@@ -21,7 +21,7 @@ class Game:
         x = (1140, 810)
 
         # change the window caption
-        pygame.display.set_caption("CleanUp!")
+        pygame.display.set_caption("Fuck you My Water is Nice")
         # create window
         self.screen = pygame.display.set_mode((1140, 810)) # (640, 480), (960, 720), (768, 576)
         self.display = pygame.Surface(x, pygame.SRCALPHA) # render on smaller resolution then scale it up to bigger screen
