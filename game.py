@@ -34,7 +34,7 @@ class Game:
         self.movement = [False, False, False, False]
 
         self.assets = {
-            'background': load_image('black.png'),
+            'background': load_image('black.jpg'),
             'boss/idle': Animation(load_images('entities/boss/idle')),
             'enemy/idle': Animation(load_images('entities/enemy/idle')),
             'player/idle': Animation(load_images('entities/player/idle')),
@@ -234,7 +234,6 @@ class Game:
                 #pygame.draw.rect(self.display, (255, 0, 0), (enemy.pos[0] - render_scroll[0] - 30, enemy.pos[1] - render_scroll[1] - 40, enemy.size[0], enemy.size[1]), 3)
                 if kill: # if enemies update fn returns true [**]d
                     self.enemies.remove(enemy) 
-                    self.score += 1
                 if enemy.pos[1] >= trueHeight:
                     self.enemies.remove(enemy) 
                 if enemy.pos[0] < 50:
@@ -252,7 +251,6 @@ class Game:
                 #pygame.draw.rect(self.display, (255, 0, 0), (enemy.pos[0] - render_scroll[0] - 30, enemy.pos[1] - render_scroll[1] - 40, enemy.size[0], enemy.size[1]), 3)
                 if kill: # if enemies update fn returns true [**]d
                     self.bosses.remove(enemy) 
-                    self.score += 1
                 if enemy.pos[1] >= trueHeight:
                     self.bosses.remove(enemy) 
                 if enemy.pos[0] < 50:

@@ -10,7 +10,7 @@ def load_image(path):
     (file path) -> (img)
     '''
     img = pygame.image.load(BASE_IMG_PATH + path).convert() # helps preformance when rendering
-    img.set_colorkey((0, 0, 0)) # removes the background in png images
+    #img.set_colorkey((0, 0, 0)) # removes the background in png images
     return img
 
 def load_images(path):
